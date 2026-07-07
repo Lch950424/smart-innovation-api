@@ -32,184 +32,233 @@
     <!-- Main Workspace -->
     <div class="app-grid">
       
-      <!-- 左側：手錶與圍籬模擬器 (Wearable Emulator) -->
-      <section class="card panel-wearable">
-        <div class="card-header">
-          <div class="header-tag">DEVICE EMULATOR</div>
-          <h2>⌚ 穿戴式手錶 & 電子圍籬模擬器</h2>
-          <p>點擊地圖任意位置，可直接變更長者的座標，模擬手錶掃描藍牙並計算定位。</p>
-        </div>
-        
-        <div class="card-body">
-          <!-- 互動地圖畫布 (SVG Map) -->
-          <div class="map-container">
-            <svg id="interactiveMap" viewBox="0 0 300 300">
-              <!-- 背景網格 -->
-              <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="1" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-              
-              <!-- 圍籬中心點 (台北101) -->
-              <circle cx="150" cy="150" r="4" fill="#a855f7" />
-              <text x="150" y="142" font-size="8" fill="#a855f7" text-anchor="middle" font-family="monospace">台北101中心</text>
-              
-              <!-- 100m 電子圍籬範圍 -->
-              <circle cx="150" cy="150" r="90" fill="rgba(99, 102, 241, 0.05)" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4,4" />
-              <text x="150" y="255" font-size="8" fill="#6366f1" text-anchor="middle">100m 電子圍籬範圍</text>
-              
-              <!-- 長者位置 (王大爺) -->
-              <g id="elderMarker" transform="translate(150, 150)">
-                <circle cx="0" cy="0" r="16" fill="rgba(239, 68, 68, 0.15)" class="pulse-marker" />
-                <circle cx="0" cy="0" r="6" fill="#ef4444" id="markerCore" />
-                <text x="0" y="-12" font-size="9" fill="#f8fafc" text-anchor="middle" font-weight="bold">王大爺</text>
-              </g>
-            </svg>
+      <!-- 左側：手錶與圍籬模擬器 & API 測試按鈕 -->
+      <div class="left-column">
+        <!-- 1. 手錶與圍籬模擬器 -->
+        <section class="card panel-wearable">
+          <div class="card-header">
+            <div class="header-tag">DEVICE EMULATOR</div>
+            <h2>⌚ 穿戴式手錶 & 電子圍籬模擬器</h2>
+            <p>點擊地圖任意位置，可直接變更長者的座標，模擬手錶掃描藍牙並計算定位。</p>
           </div>
-
-          <!-- 快速模擬按鈕 -->
-          <div class="simulation-controls">
-            <button onclick="moveElderPreset('center')" class="btn-secondary">🏠 移到中心點 (安全)</button>
-            <button onclick="moveElderPreset('out')" class="btn-secondary danger-border">🚨 移出圍籬 (模擬出界)</button>
-            <button onclick="triggerSOS()" class="btn-primary sos-btn">⚠️ 手錶 SOS 警報</button>
-          </div>
-
-          <!-- 手錶狀態顯示 -->
-          <div class="status-panel">
-            <h3>手錶連線狀態與數值</h3>
-            <div class="status-grid">
-              <div class="status-item">
-                <span class="label">長者狀態</span>
-                <span id="elderStatusBadge" class="value status-normal">正常監控中</span>
-              </div>
-              <div class="status-item">
-                <span class="label">中心距離</span>
-                <span id="fenceDistance" class="value">0 公尺</span>
-              </div>
-              <div class="status-item">
-                <span class="label">緯度 (Lat)</span>
-                <span id="latVal" class="value font-mono">25.03390</span>
-              </div>
-              <div class="status-item">
-                <span class="label">經度 (Lng)</span>
-                <span id="lngVal" class="value font-mono">121.56440</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 右側：手機 App 雙角色測試區 (App Portal) -->
-      <section class="card panel-apps">
-        <div class="role-tabs">
-          <button id="adminTab" class="role-tab active" onclick="switchRole('admin')">🩺 管理者 App 介面</button>
-          <button id="familyTab" class="role-tab" onclick="switchRole('family')">🏡 家屬 App 介面</button>
-        </div>
-
-        <div class="card-body scroll-panel">
           
-          <!-- ================= 管理者 APP 介面 ================= -->
-          <div id="adminPortal" class="role-portal-content">
-            <div class="portal-header-info">
-              <h3>管理者看板 (機構/管理人員)</h3>
-              <p>負責查看長者定位、接收出界警報、確認餵藥狀態。</p>
+          <div class="card-body">
+            <!-- 互動地圖畫布 (SVG Map) -->
+            <div class="map-container">
+              <svg id="interactiveMap" viewBox="0 0 300 300">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="1" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                
+                <!-- 圍籬中心點 (台北101) -->
+                <circle cx="150" cy="150" r="4" fill="#a855f7" />
+                <text x="150" y="142" font-size="8" fill="#a855f7" text-anchor="middle" font-family="monospace">台北101中心</text>
+                
+                <!-- 100m 電子圍籬範圍 -->
+                <circle cx="150" cy="150" r="90" fill="rgba(99, 102, 241, 0.05)" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4,4" />
+                <text x="150" y="255" font-size="8" fill="#6366f1" text-anchor="middle">100m 電子圍籬範圍</text>
+                
+                <!-- 長者位置 (王大爺) -->
+                <g id="elderMarker" transform="translate(150, 150)">
+                  <circle cx="0" cy="0" r="16" fill="rgba(239, 68, 68, 0.15)" class="pulse-marker" />
+                  <circle cx="0" cy="0" r="6" fill="#ef4444" id="markerCore" />
+                  <text x="0" y="-12" font-size="9" fill="#f8fafc" text-anchor="middle" font-weight="bold">王大爺</text>
+                </g>
+              </svg>
             </div>
 
-            <!-- 即時警報通知視窗 (FCM / WebSocket 模擬) -->
-            <div id="adminAlertBox" class="alert-box-container hidden">
-              <div class="alert-header">
-                <span class="pulse-dot"></span>
-                <h4>⚠️ 偵測到長者超出圍籬警報！</h4>
-              </div>
-              <div class="alert-body">
-                <p>長者 <strong id="alertElderName">王大爺</strong> 已經超出安全圍籬區域。</p>
-                <div class="alert-meta">
-                  <span>觸發時間：<span id="alertTime">--:--</span></span>
-                  <span>狀態：<strong>待確認</strong></span>
-                </div>
-              </div>
-              <div class="alert-actions">
-                <button id="confirmAlertBtn" onclick="confirmCurrentAlert()" class="btn-primary btn-alert-confirm">確認長者狀態並解除警告</button>
-              </div>
+            <!-- 快速定位按鈕 -->
+            <div class="simulation-controls">
+              <button onclick="moveElderPreset('center')" class="btn-secondary">🏠 移到中心點 (安全)</button>
+              <button onclick="moveElderPreset('out')" class="btn-secondary danger-border">🚨 移出圍籬 (模擬出界)</button>
             </div>
 
-            <!-- 長者即時定位地圖視窗 -->
-            <div class="admin-section">
-              <h4>📍 照護對象目前位置地圖</h4>
-              <div class="map-preview">
-                <div class="map-preview-info">
-                  <p><strong>王大爺</strong> 狀態：<span id="adminMapStatus">正常</span></p>
-                  <p class="font-mono text-sm" id="adminMapCoords">座標: 25.0339, 121.5644</p>
+            <!-- 手錶狀態顯示 -->
+            <div class="status-panel">
+              <div class="status-grid">
+                <div class="status-item">
+                  <span class="label">長者狀態</span>
+                  <span id="elderStatusBadge" class="value status-normal">正常監控中</span>
                 </div>
-                <div class="mini-radar">
-                  <div class="radar-line"></div>
-                  <div class="radar-dot" id="radarDot"></div>
+                <div class="status-item">
+                  <span class="label">中心距離</span>
+                  <span id="fenceDistance" class="value">0 公尺</span>
                 </div>
-              </div>
-            </div>
-
-            <!-- 今日用藥提醒看板 -->
-            <div class="admin-section">
-              <h4>💊 今日餵藥確認清單</h4>
-              <p class="section-desc">家屬設定的用藥提醒，管理者餵食藥物後在此點選確認，系統會回報給家屬。</p>
-              <div id="adminMedsList" class="meds-list-container">
-                <!-- 動態載入用藥項目 -->
+                <div class="status-item">
+                  <span class="label">緯度 (Lat)</span>
+                  <span id="latVal" class="value font-mono">25.03390</span>
+                </div>
+                <div class="status-item">
+                  <span class="label">經度 (Lng)</span>
+                  <span id="lngVal" class="value font-mono">121.56440</span>
+                </div>
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- ================= 家屬 APP 介面 ================= -->
-          <div id="familyPortal" class="role-portal-content hidden">
-            <div class="portal-header-info">
-              <h3>家屬看板 (親屬/聯絡人)</h3>
-              <p>可進行長者請假/外出設定，避免誤報；管理長者用藥排程。</p>
+        <!-- 2. 測試按鈕面板 (新增要求) -->
+        <section class="card panel-test-triggers">
+          <div class="card-header">
+            <div class="header-tag">API TEST PANEL</div>
+            <h2>🔴 API 測試按鈕 (動態模擬發送)</h2>
+            <p>按下後將直接對後端 API 發送請求，模擬外部感測器、手錶或家屬 App 操作。</p>
+          </div>
+          <div class="card-body">
+            <div class="test-btn-grid">
+              <button onclick="apiTriggerOutOfBounds()" class="btn-test danger-bg">🏃 模擬長者超出圍籬 (POST)</button>
+              <button onclick="apiTriggerSOS()" class="btn-test danger-bg">🚨 模擬手錶 SOS 求救 (POST)</button>
+              <button onclick="apiTriggerLeave('leave')" class="btn-test leave-bg">🛌 家屬設定請假 (POST)</button>
+              <button onclick="apiTriggerLeave('outing')" class="btn-test leave-bg">🚗 家屬設定外出 (POST)</button>
+              <button onclick="apiTriggerLeave('cancel')" class="btn-test cancel-bg">🔄 家屬取消假單 (POST)</button>
+              <button onclick="apiTriggerAddMed()" class="btn-test med-bg">💊 家屬新增測試用藥 (POST)</button>
             </div>
+          </div>
+        </section>
+      </div>
 
-            <!-- 請假與外出設定 -->
-            <div class="family-section">
-              <h4>🗓️ 請假與外出狀態設定</h4>
-              <p class="section-desc">當您帶長者外出看診或請假回家時，請開啟此功能。系統將**暫停**電子圍籬警報，避免管理員接收到警告。</p>
-              <div class="leave-status-card">
-                <p>目前長者狀態：<span id="familyElderStatus" class="status-pill status-normal">監控中</span></p>
-                <div class="leave-actions">
-                  <button onclick="setElderLeave('leave')" class="btn-secondary">🛌 辦理請假 (回家休養)</button>
-                  <button onclick="setElderLeave('outing')" class="btn-secondary">🚗 設定外出 (家人帶出)</button>
-                  <button onclick="setElderLeave('cancel')" class="btn-primary">🔄 回歸監控 (返回機構)</button>
-                </div>
+      <!-- 右側：iPhone 13 雙角色模擬器 (App Simulator) -->
+      <div class="right-column flex-center">
+        <div class="iphone-13-frame">
+          <div class="iphone-notch">
+            <div class="camera"></div>
+            <div class="speaker"></div>
+          </div>
+          
+          <!-- iOS 系統通知橫幅 (動態滑出) -->
+          <div id="iosNotification" class="ios-notification-banner hidden" onclick="switchRoleAndFocus('admin')">
+            <div class="banner-icon">👵🏻</div>
+            <div class="banner-content">
+              <div class="banner-header">
+                <span class="banner-title">智慧長者照護系統</span>
+                <span class="banner-time">現在</span>
               </div>
-            </div>
-
-            <!-- 新增用藥提醒 -->
-            <div class="family-section">
-              <h4>➕ 新增用藥提醒</h4>
-              <form id="addMedForm" class="add-med-form" onsubmit="addMedication(event)">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="medName">藥物名稱</label>
-                    <input type="text" id="medName" placeholder="例如: 降血壓藥" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="medTime">提醒時間</label>
-                    <input type="time" id="medTime" required>
-                  </div>
-                </div>
-                <button type="submit" class="btn-primary btn-sm">加入用藥清單</button>
-              </form>
-            </div>
-
-            <!-- 用藥提醒清單 -->
-            <div class="family-section">
-              <h4>📋 目前用藥排程</h4>
-              <div id="familyMedsList" class="meds-list-container">
-                <!-- 動態載入用藥清單 -->
-              </div>
+              <p class="banner-text">⚠️ 警報！長者王大爺已超出安全電子圍籬！</p>
             </div>
           </div>
 
+          <!-- iOS 畫面內容 -->
+          <div class="iphone-screen">
+            <div class="iphone-status-bar">
+              <span class="time" id="iphoneTime">09:41</span>
+              <div class="status-icons">
+                <span>📶</span>
+                <span>🛜</span>
+                <span>🔋</span>
+              </div>
+            </div>
+
+            <!-- App Tab 分頁 -->
+            <div class="role-tabs">
+              <button id="adminTab" class="role-tab active" onclick="switchRole('admin')">🩺 管理員 App</button>
+              <button id="familyTab" class="role-tab" onclick="switchRole('family')">🏡 家屬 App</button>
+            </div>
+
+            <div class="iphone-app-content scroll-panel">
+              
+              <!-- ================= 管理者 APP 介面 ================= -->
+              <div id="adminPortal" class="role-portal-content">
+                <div class="portal-header-info">
+                  <h3>照護機構管理員介面</h3>
+                  <p>查看長者定位、接收出界警報、確認餵藥狀態。</p>
+                </div>
+
+                <!-- 警報通知框 -->
+                <div id="adminAlertBox" class="alert-box-container hidden">
+                  <div class="alert-header">
+                    <span class="pulse-dot"></span>
+                    <h4>⚠️ 偵測到超出圍籬！</h4>
+                  </div>
+                  <div class="alert-body">
+                    <p>長者 <strong id="alertElderName">王大爺</strong> 已超出安全範圍。</p>
+                    <div class="alert-meta">
+                      <span>觸發時間：<span id="alertTime">--:--</span></span>
+                    </div>
+                  </div>
+                  <button id="confirmAlertBtn" onclick="confirmCurrentAlert()" class="btn-primary btn-alert-confirm">確認安全並解除警報</button>
+                </div>
+
+                <!-- 即時定位地圖 -->
+                <div class="admin-section">
+                  <h4>📍 照護對象目前位置</h4>
+                  <div class="map-preview">
+                    <div class="map-preview-info">
+                      <p><strong>王大爺</strong> 狀態：<span id="adminMapStatus">正常</span></p>
+                      <p class="font-mono text-sm" id="adminMapCoords">座標: 25.0339, 121.5644</p>
+                    </div>
+                    <div class="mini-radar">
+                      <div class="radar-line"></div>
+                      <div class="radar-dot" id="radarDot"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 用藥確認清單 -->
+                <div class="admin-section">
+                  <h4>💊 今日餵藥確認清單</h4>
+                  <div id="adminMedsList" class="meds-list-container">
+                    <!-- 動態載入用藥項目 -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- ================= 家屬 APP 介面 ================= -->
+              <div id="familyPortal" class="role-portal-content hidden">
+                <div class="portal-header-info">
+                  <h3>家屬即時監看介面</h3>
+                  <p>進行長者請假/外出設定，管理用藥排程。</p>
+                </div>
+
+                <!-- 請假與外出設定 -->
+                <div class="family-section">
+                  <h4>🗓️ 請假與外出狀態設定</h4>
+                  <div class="leave-status-card">
+                    <p>目前長者狀態：<span id="familyElderStatus" class="status-pill status-normal">監控中</span></p>
+                    <div class="leave-actions">
+                      <button onclick="setElderLeave('leave')" class="btn-secondary">🛌 辦理請假</button>
+                      <button onclick="setElderLeave('outing')" class="btn-secondary">🚗 設定外出</button>
+                      <button onclick="setElderLeave('cancel')" class="btn-primary">🔄 回歸監控</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 新增用藥提醒 -->
+                <div class="family-section">
+                  <h4>➕ 新增用藥提醒</h4>
+                  <form id="addMedForm" class="add-med-form" onsubmit="addMedication(event)">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="medName">藥物名稱</label>
+                        <input type="text" id="medName" placeholder="例如: 降血壓藥" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="medTime">提醒時間</label>
+                        <input type="time" id="medTime" required>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn-primary btn-sm">加入用藥清單</button>
+                  </form>
+                </div>
+
+                <!-- 用藥提醒清單 -->
+                <div class="family-section">
+                  <h4>📋 目前用藥排程</h4>
+                  <div id="familyMedsList" class="meds-list-container">
+                    <!-- 動態載入用藥清單 -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- iOS Home 虛擬條 -->
+            <div class="iphone-home-indicator"></div>
+          </div>
         </div>
-      </section>
+      </div>
 
     </div>
 
@@ -220,12 +269,15 @@
   </div>
 
   <script>
-    // 專案全域狀態
+    // 全域變數
     const ELDER_ID = 'elder-01';
     let currentRole = 'admin';
     const fenceCenter = { lat: 25.0339, lng: 121.5644 };
+    let hasAlert = false;
+    let alarmInterval = null;
+    let audioCtx = null;
 
-    // 地圖點擊定位更新
+    // 定位地圖操作
     const map = document.getElementById('interactiveMap');
     const marker = document.getElementById('elderMarker');
     
@@ -234,21 +286,17 @@
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // 計算相對於地圖視窗 300x300 的座標
       const svgX = (x / rect.width) * 300;
       const svgY = (y / rect.height) * 300;
       
       updateMarkerPosition(svgX, svgY);
     });
 
-    // 依據畫布座標更新 Marker 位置，並打 API 給後端
     function updateMarkerPosition(x, y) {
       marker.setAttribute('transform', `translate(${x}, ${y})`);
       
-      // 將 SVG 座標對應回實際經緯度 (台北101為中心，半徑 90px 代表 100m)
-      // 比例尺：1px 約等於 1.11 公尺，大約對應經緯度 0.00001
       const scale = 0.00001; 
-      const deltaLat = -(y - 150) * scale; // 畫布 Y 軸朝下，緯度朝北
+      const deltaLat = -(y - 150) * scale;
       const deltaLng = (x - 150) * scale;
       
       const newLat = fenceCenter.lat + deltaLat;
@@ -257,17 +305,88 @@
       sendWearableStatus(newLat, newLng);
     }
 
-    // 快速模擬預設按鈕
     function moveElderPreset(preset) {
       if (preset === 'center') {
         updateMarkerPosition(150, 150);
       } else if (preset === 'out') {
-        // 移出圍籬之外 (X 軸偏移大於 90px，例如 260px)
         updateMarkerPosition(260, 150);
       }
     }
 
-    // 發送手錶狀態 API
+    // ================= API 模擬觸發器按鈕方法 =================
+    // 1. 模擬出界 (API POST)
+    function apiTriggerOutOfBounds() {
+      // 模擬手錶呼叫 /api/wearable/status (打出界座標：緯度偏移 0.0011)
+      const lat = fenceCenter.lat + 0.0011;
+      const lng = fenceCenter.lng + 0.0011;
+      
+      // 更新 SVG 上的圓點位置以求真實感
+      marker.setAttribute('transform', 'translate(260, 40)');
+      
+      sendWearableStatus(lat, lng);
+    }
+
+    // 2. 模擬 SOS (API POST)
+    async function apiTriggerSOS() {
+      try {
+        const res = await fetch('/api/wearable/alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ elderId: ELDER_ID })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          syncData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 3. 模擬請假與外出 (API POST)
+    async function apiTriggerLeave(type) {
+      try {
+        const res = await fetch('/api/family/leave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ elderId: ELDER_ID, type })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          syncData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 4. 模擬新增用藥提醒 (API POST)
+    async function apiTriggerAddMed() {
+      const medList = ['感冒藥', '葉黃素', '鈣片', '綜合維他命', '血糖藥'];
+      const randomMed = medList[Math.floor(Math.random() * medList.length)];
+      const randomHour = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+      const randomMin = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+      
+      try {
+        const res = await fetch('/api/family/meds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            elderId: ELDER_ID,
+            medName: randomMed,
+            remindTime: `${randomHour}:${randomMin}`
+          })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          syncData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 發送定位 API
     async function sendWearableStatus(lat, lng) {
       try {
         const res = await fetch('/api/wearable/status', {
@@ -289,25 +408,7 @@
       }
     }
 
-    // 手錶 SOS 警報
-    async function triggerSOS() {
-      try {
-        const res = await fetch('/api/wearable/alert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ elderId: ELDER_ID })
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-          alert('🚨 手錶端已觸發 SOS 警報！請檢查管理員 App。');
-          syncData();
-        }
-      } catch (err) {
-        console.error('發送警報失敗', err);
-      }
-    }
-
-    // 同步手錶數值顯示面板
+    // 同步顯示數值
     function syncStatusPanel(data, lat, lng) {
       document.getElementById('latVal').textContent = lat.toFixed(5);
       document.getElementById('lngVal').textContent = lng.toFixed(5);
@@ -316,9 +417,7 @@
       const badge = document.getElementById('elderStatusBadge');
       updateStatusBadge(badge, data.elderStatus);
       
-      // 更新雷達圖雷達點
       const radarDot = document.getElementById('radarDot');
-      // 將 -150 到 150 映射到雷達圖 100% 容器中
       const mapX = marker.transform.baseVal.getItem(0).matrix.e;
       const mapY = marker.transform.baseVal.getItem(0).matrix.f;
       radarDot.style.left = `${(mapX / 300) * 100}%`;
@@ -327,9 +426,8 @@
       syncData();
     }
 
-    // 更新狀態徽章樣式
     function updateStatusBadge(element, status) {
-      element.className = 'value'; // 重置
+      element.className = 'value';
       if (status === 'normal') {
         element.textContent = '正常監控中';
         element.classList.add('status-normal');
@@ -337,15 +435,15 @@
         element.textContent = '⚠️ 超出圍籬！';
         element.classList.add('status-alert');
       } else if (status === 'on_leave') {
-        element.textContent = '🛌 請假在家';
+        element.textContent = '🛌 請假中';
         element.classList.add('status-leave');
       } else if (status === 'outing') {
-        element.textContent = '🚗 外出中';
+        element.textContent = '🚗 外送中';
         element.classList.add('status-leave');
       }
     }
 
-    // 切換 APP 角色
+    // 角色切換
     function switchRole(role) {
       currentRole = role;
       document.getElementById('adminTab').classList.toggle('active', role === 'admin');
@@ -357,7 +455,54 @@
       syncData();
     }
 
-    // ================= 統一同步雲端狀態與日誌 =================
+    function switchRoleAndFocus(role) {
+      switchRole(role);
+      // 隱藏 iOS 通知橫幅
+      document.getElementById('iosNotification').classList.add('hidden');
+    }
+
+    // ================= 音效合成警笛音 (Siren Sound using Web Audio) =================
+    function startAlarmSound() {
+      if (alarmInterval) return;
+      
+      // 合成警笛聲
+      alarmInterval = setInterval(() => {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'sine';
+          // 警笛起伏頻率
+          osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(1000, audioCtx.currentTime + 0.3);
+          osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.6);
+          
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.55);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.6);
+        } catch (e) {
+          console.error("音效播送失敗，瀏覽器可能尚未取得音訊授權:", e);
+        }
+      }, 700);
+    }
+
+    function stopAlarmSound() {
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+    }
+
+    // ================= 統一同步資料庫狀態 =================
     async function syncData() {
       try {
         // 1. 同步長者狀態
@@ -366,42 +511,52 @@
         const elder = locationData.data.find(e => e.id === ELDER_ID);
 
         if (elder) {
-          // 同步家屬介面長者狀態顯示
           const familyBadge = document.getElementById('familyElderStatus');
           updateStatusBadge(familyBadge, elder.status);
           
-          // 同步管理員地圖狀態文字
-          const statusTextMap = { normal: '正常', out_of_bounds: '⚠️ 超出安全範圍', on_leave: '🛌 請假中', outing: '🚗 外出中' };
+          const statusTextMap = { normal: '正常', out_of_bounds: '⚠️ 超出圍籬區域', on_leave: '🛌 請假中', outing: '🚗 外出中' };
           document.getElementById('adminMapStatus').textContent = statusTextMap[elder.status] || elder.status;
           document.getElementById('adminMapCoords').textContent = `座標: ${elder.latitude.toFixed(5)}, ${elder.longitude.toFixed(5)}`;
           
-          // 同步手錶面板 (若不是經由地圖點擊觸發)
           const badge = document.getElementById('elderStatusBadge');
           updateStatusBadge(badge, elder.status);
           
-          // 更新地圖標記核心顏色 (出界時紅色，請假時藍色，正常綠色)
           const core = document.getElementById('markerCore');
           if (elder.status === 'out_of_bounds') core.setAttribute('fill', '#ef4444');
           else if (elder.status === 'on_leave' || elder.status === 'outing') core.setAttribute('fill', '#3b82f6');
           else core.setAttribute('fill', '#10b981');
         }
 
-        // 2. 同步警報 (管理員 App)
+        // 2. 同步警報與通知 (新增 iOS 警報與通知)
         const alertsRes = await fetch('/api/admin/alerts');
         const alertsData = await alertsRes.json();
         const pendingAlert = alertsData.data.find(a => a.status === 'pending');
         
         const alertBox = document.getElementById('adminAlertBox');
+        const iosBanner = document.getElementById('iosNotification');
+
         if (pendingAlert) {
           alertBox.classList.remove('hidden');
           document.getElementById('alertElderName').textContent = pendingAlert.elder_name;
           document.getElementById('alertTime').textContent = new Date(pendingAlert.triggered_at).toLocaleTimeString();
           document.getElementById('confirmAlertBtn').onclick = () => confirmCurrentAlert(pendingAlert.id);
+
+          // 觸發警報通知橫幅 (若目前不在 Admin，或是剛警報觸發)
+          if (!hasAlert) {
+            hasAlert = true;
+            iosBanner.classList.remove('hidden');
+            // 開始播放警笛聲
+            startAlarmSound();
+          }
         } else {
           alertBox.classList.add('hidden');
+          iosBanner.classList.add('hidden');
+          hasAlert = false;
+          // 停止警報聲
+          stopAlarmSound();
         }
 
-        // 3. 同步藥物清單 (管理員與家屬)
+        // 3. 同步藥物清單
         const medsRes = await fetch('/api/admin/meds/today');
         const medsData = await medsRes.json();
         
@@ -413,7 +568,6 @@
       }
     }
 
-    // 解除/確認警報
     async function confirmCurrentAlert(alertId) {
       if (!alertId) return;
       try {
@@ -422,19 +576,17 @@
         });
         const data = await res.json();
         if (data.status === 'success') {
-          alert('管理員已確認安全，警報解除。');
           syncData();
         }
       } catch (err) {
-        console.error('解警警報失敗', err);
+        console.error(err);
       }
     }
 
-    // 渲染管理員餵藥清單
     function renderMedsAdmin(meds) {
       const container = document.getElementById('adminMedsList');
       if (meds.length === 0) {
-        container.innerHTML = '<p class="text-muted text-sm">目前無任何用藥提醒設定。</p>';
+        container.innerHTML = '<p class="text-muted text-sm">目前無任何用藥設定。</p>';
         return;
       }
       
@@ -445,17 +597,16 @@
             <span class="med-name">${med.med_name}</span>
           </div>
           <button onclick="toggleMedAdministered('${med.id}', ${!med.is_administered})" class="btn-check ${med.is_administered ? 'checked' : ''}">
-            ${med.is_administered ? '✓ 已餵藥' : '未餵藥 (點點確認)'}
+            ${med.is_administered ? '✓ 已餵藥' : '確認餵藥'}
           </button>
         </div>
       `).join('');
     }
 
-    // 渲染家屬端藥物清單
     function renderMedsFamily(meds) {
       const container = document.getElementById('familyMedsList');
       if (meds.length === 0) {
-        container.innerHTML = '<p class="text-muted text-sm">目前無用藥排程，請於上方新增。</p>';
+        container.innerHTML = '<p class="text-muted text-sm">目前無用藥排程。</p>';
         return;
       }
       
@@ -466,13 +617,12 @@
             <span class="med-name">${med.med_name}</span>
           </div>
           <span class="med-status ${med.is_administered ? 'administered-text' : 'pending-text'}">
-            ${med.is_administered ? 'Institution: 已餵食' : 'Institution: 尚未餵食'}
+            ${med.is_administered ? '已餵食' : '尚未餵食'}
           </span>
         </div>
       `).join('');
     }
 
-    // 管理員切換餵藥狀態
     async function toggleMedAdministered(medId, status) {
       try {
         await fetch(`/api/admin/meds/${medId}/check`, {
@@ -482,33 +632,26 @@
         });
         syncData();
       } catch (err) {
-        console.error('更新餵藥狀態失敗', err);
+        console.error(err);
       }
     }
 
-    // 家屬設定請假或外出
     async function setElderLeave(type) {
       try {
         const res = await fetch('/api/family/leave', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            elderId: ELDER_ID,
-            type: type
-          })
+          body: JSON.stringify({ elderId: ELDER_ID, type })
         });
         const data = await res.json();
         if (data.status === 'success') {
-          const typeMap = { leave: '請假', outing: '外出', cancel: '取消假單' };
-          alert(`長者狀態已更新為：${typeMap[type]}`);
           syncData();
         }
       } catch (err) {
-        console.error('請假設定失敗', err);
+        console.error(err);
       }
     }
 
-    // 家屬新增用藥
     async function addMedication(e) {
       e.preventDefault();
       const medName = document.getElementById('medName').value;
@@ -530,17 +673,33 @@
           syncData();
         }
       } catch (err) {
-        console.error('新增藥物失敗', err);
+        console.error(err);
       }
     }
 
-    // 初始化自動載入
+    // 更新 iPhone 上的時間
+    function updateIphoneTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('iphoneTime').textContent = `${hours}:${hours}`; // 或者是 `${hours}:${mins}`
+      document.getElementById('iphoneTime').textContent = `${hours}:${mins}`;
+    }
+
+    // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      // 預設將長者放到中心點
       updateMarkerPosition(150, 150);
-      
-      // 每 2 秒自動輪詢同步資料
       setInterval(syncData, 2000);
+      
+      updateIphoneTime();
+      setInterval(updateIphoneTime, 60000);
+
+      // 解除瀏覽器對音訊的自動阻擋策略 (User Gesture Activation)
+      document.body.addEventListener('click', () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }, { once: true });
     });
   </script>
 </body>
