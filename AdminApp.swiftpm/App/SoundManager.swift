@@ -13,9 +13,7 @@ class SoundManager {
         
         // 每 1.2 秒循環播放 iOS 內建警報/系統提示音 (ID: 1005 類似警笛或警告)
         timer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: true) { _ in
-            // 播放警告音
             AudioServicesPlaySystemSound(1005)
-            // 同時觸發手機震動 (Vibration)
             AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         }
     }
