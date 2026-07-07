@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧創新 API 測試控制台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+  </div>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="icon">⚡</span>
+        <h1>Smart Innovation <span class="gradient-text">API Portal</span></h1>
+      </div>
+      <p class="subtitle">全國大專校院智慧創新暨跨域整合創作競賽 —— 外部網路 API 串接與測試主機</p>
+      <div class="status-badge-container">
+        <span class="status-dot online"></span>
+        <span class="status-text">伺服器運行中</span>
+      </div>
+    </header>
+
+    <main class="app-grid">
+      <!-- 左側：發送 POST 請求 -->
+      <section class="card panel-sender">
+        <div class="card-header">
+          <h2>模擬發送 POST 請求</h2>
+          <p>您可以在此輸入資料，模擬外部設備 (例如 IoT 晶片、感測器或手機 App) 發送 POST 請求給此主機。</p>
+        </div>
+        <div class="card-body">
+          <div class="api-endpoint-badge">
+            <span class="method">POST</span>
+            <span class="url">/api/messages</span>
+          </div>
+
+          <form id="postForm" class="post-form">
+            <div class="form-group">
+              <label for="jsonPayload">JSON 資料內容 (Payload)</label>
+              <textarea id="jsonPayload" rows="8" spellcheck="false">{
+  "deviceId": "ESP32-SmartSensor-01",
+  "temperature": 26.5,
+  "humidity": 62,
+  "status": "normal",
+  "message": "Hello from external device!"
+}</textarea>
+            </div>
+            <button type="submit" id="submitBtn" class="btn-primary">
+              <span class="btn-text">送出 POST 請求</span>
+              <span class="btn-loader hidden"></span>
+            </button>
+          </form>
+
+          <div class="test-curl-section">
+            <h3>或者從終端機使用 cURL 測試：</h3>
+            <div class="code-box">
+              <code id="curlCode">curl -X POST -H "Content-Type: application/json" -d '{"deviceId":"test","val":123}' http://your-domain/api/messages</code>
+              <button onclick="copyCurl()" class="btn-copy" title="複製指令">複製</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右側：接收日誌 -->
+      <section class="card panel-logs">
+        <div class="card-header">
+          <div class="header-flex">
+            <h2>即時接收日誌 (Live Logs)</h2>
+            <div class="actions">
+              <button id="clearBtn" class="btn-secondary" onclick="clearLocalLogs()">清空畫面</button>
+              <button id="refreshBtn" class="btn-secondary" onclick="fetchLogs()">手動刷新</button>
+            </div>
+          </div>
+          <p>每 2 秒自動同步一次。此面板顯示外部傳送至本主機的所有 POST 數據紀錄。</p>
+        </div>
+        <div class="card-body log-container">
+          <div id="noLogs" class="empty-state">
+            <div class="empty-icon">📥</div>
+            <p>目前尚無 API 呼叫記錄，請嘗試在左側送出請求或從外部調用。</p>
+          </div>
+          <div id="logList" class="log-list hidden">
+            <!-- 動態插入 Log 卡片 -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>© 2026 全國大專校院智慧創新暨跨域整合創作競賽 參賽專案基礎架構</p>
+    </footer>
+  </div>
+
+  <script>
+    // 自動更新 curl 說明中的網址
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentUrl = window.location.origin;
+      const curlCode = document.getElementById('curlCode');
+      curlCode.textContent = `curl -X POST -H "Content-Type: application/json" -d '{"deviceId": "ESP32-01", "temperature": 26.5}' ${currentUrl}/api/messages`;
+      
+      // 首次載入日誌
+      fetchLogs();
+      // 設定每 2 秒輪詢一次
+      setInterval(fetchLogs, 2000);
+    });
+
+    // 複製 cURL 內容
+    function copyCurl() {
+      const curlCode = document.getElementById('curlCode');
+      navigator.clipboard.writeText(curlCode.textContent);
+      const copyBtn = document.querySelector('.btn-copy');
+      copyBtn.textContent = '已複製！';
+      setTimeout(() => {
+        copyBtn.textContent = '複製';
+      }, 2000);
+    }
+
+    // 發送 POST 請求
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payloadText = document.getElementById('jsonPayload').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = submitBtn.querySelector('.btn-text');
+      const btnLoader = submitBtn.querySelector('.btn-loader');
+
+      let payload;
+      try {
+        payload = JSON.parse(payloadText);
+      } catch (err) {
+        alert('JSON 格式錯誤，請檢查語法是否正確！');
+        return;
+      }
+
+      // UI 讀取中狀態
+      submitBtn.disabled = true;
+      btnText.textContent = '傳送中...';
+      btnLoader.classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        
+        // 成功後立即刷新日誌
+        await fetchLogs();
+      } catch (error) {
+        console.error('發送失敗:', error);
+        alert('API 發送失敗，請確認伺服器是否正常運行。');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = '送出 POST 請求';
+        btnLoader.classList.add('hidden');
+      }
+    });
+
+    // 獲取後端日誌
+    async function fetchLogs() {
+      try {
+        const response = await fetch('/api/messages');
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data.length > 0) {
+          document.getElementById('noLogs').classList.add('hidden');
+          const logList = document.getElementById('logList');
+          logList.classList.remove('hidden');
+          
+          // 渲染日誌
+          logList.innerHTML = result.data.map(log => `
+            <div class="log-card" id="log-${log.id}">
+              <div class="log-card-header">
+                <span class="log-ip">IP: ${log.senderIp}</span>
+                <span class="log-time">${new Date(log.receivedAt).toLocaleTimeString()}</span>
+              </div>
+              <div class="log-card-body">
+                <pre><code>${JSON.stringify(log.body, null, 2)}</code></pre>
+              </div>
+              <div class="log-card-footer">
+                <span class="log-id">ID: ${log.id}</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('noLogs').classList.remove('hidden');
+          document.getElementById('logList').classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('獲取日誌失敗:', error);
+      }
+    }
+
+    // 清除前端日誌（仅隱藏，重新整理會再次載入，或可發起後端清空，這裡做前端視覺清除提示）
+    function clearLocalLogs() {
+      // 為求演示便利，這裡提示使用者
+      console.log('清空本機日誌檢視');
+      const logList = document.getElementById('logList');
+      logList.innerHTML = '';
+      document.getElementById('noLogs').classList.remove('hidden');
+      logList.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
